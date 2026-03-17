@@ -24,19 +24,26 @@ export function IdeaForm() {
     market: "",
   })
 
-  const handleSubmit = async (e: React.FormEvent) => {
+ const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault()
   setIsLoading(true)
 
   try {
 
-    const response = await fetch("http://localhost:5000/api/ideas/validate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    })
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/ideas/validate`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error("API request failed")
+    }
 
     const result = await response.json()
 
@@ -44,14 +51,14 @@ export function IdeaForm() {
 
     sessionStorage.setItem("currentIdea", JSON.stringify(formData))
 
-    // ✅ store only the analysis
     sessionStorage.setItem("analysisResult", JSON.stringify(result.data))
 
     router.push("/dashboard/result")
 
   } catch (error) {
 
-    console.error(error)
+    console.error("Error:", error)
+    alert("Something went wrong. Please try again.")
 
   } finally {
 
