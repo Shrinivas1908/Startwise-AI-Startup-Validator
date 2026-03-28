@@ -1,27 +1,23 @@
 const axios = require("axios");
-const Idea = require("../models/Idea");
 
 exports.validateIdea = async (req, res) => {
   try {
-
-    const { title, description, market } = req.body;
+    const { idea } = req.body;
 
     const prompt = `
-    Analyze this startup idea:
+Analyze this startup idea:
 
-    Title: ${title}
-    Description: ${description}
-    Market: ${market}
+"${idea}"
 
-    Provide:
-    - Startup validation score out of 100
-    - Market potential
-    - Competition level
-    - Risks
-    `;
+Give:
+1. Validation score (out of 100)
+2. Market potential
+3. Competition level
+4. Possible risks
+`;
 
     const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         contents: [
           {
@@ -31,17 +27,10 @@ exports.validateIdea = async (req, res) => {
       }
     );
 
+    // ✅ SAFE RESPONSE HANDLING
     const aiText =
-      response.data.candidates[0].content.parts[0].text;
-
-    const idea = new Idea({
-      title,
-      description,
-      market,
-      validationScore: Math.floor(Math.random() * 100)
-    });
-
-    await idea.save();
+      response.data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "No AI response";
 
     res.json({
       message: "AI Startup Analysis",
@@ -49,12 +38,10 @@ exports.validateIdea = async (req, res) => {
     });
 
   } catch (error) {
-
     console.error("AI ERROR:", error.response?.data || error.message);
 
     res.status(500).json({
       error: "AI analysis failed"
     });
-
   }
 };

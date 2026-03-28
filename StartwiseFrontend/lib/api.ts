@@ -1,4 +1,4 @@
-export const API = "http://localhost:5000/api/ideas"
+export const API = process.env.NEXT_PUBLIC_API_URL + "/api/ideas"
 
 export async function analyzeIdea(data:any){
 
