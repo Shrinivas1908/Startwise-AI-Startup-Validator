@@ -1,19 +1,21 @@
-const axios = require("axios");
+import axios from "axios";
 
-exports.validateIdea = async (req, res) => {
+export const validateIdea = async (req, res) => {
   try {
-    const { idea } = req.body;
+    const { idea, description, market } = req.body;
 
     const prompt = `
 Analyze this startup idea:
 
-"${idea}"
+Idea: ${idea}
+Description: ${description}
+Target Market: ${market}
 
 Give:
-1. Validation score (out of 100)
+1. Score out of 100
 2. Market potential
 3. Competition level
-4. Possible risks
+4. Risks
 `;
 
     const response = await axios.post(
@@ -24,24 +26,29 @@ Give:
             parts: [{ text: prompt }]
           }
         ]
+      },
+      {
+        headers: {
+          "Content-Type": "application/json"
+        }
       }
     );
 
-    // ✅ SAFE RESPONSE HANDLING
     const aiText =
-      response.data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "No AI response";
+      response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
     res.json({
       message: "AI Startup Analysis",
-      analysis: aiText
+      analysis: aiText || "No response"
     });
 
   } catch (error) {
-    console.error("AI ERROR:", error.response?.data || error.message);
+  console.error("🔥 AI FULL ERROR:");
+  console.error(error.response?.data || error.message);
 
-    res.status(500).json({
-      error: "AI analysis failed"
-    });
-  }
+  res.status(500).json({
+    error: "AI analysis failed",
+    details: error.response?.data || error.message
+  });
+ }
 };
