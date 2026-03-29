@@ -17,22 +17,23 @@ Give:
 3. Competition level
 4. Risks
 `;
-
+console.log("API KEY:", process.env.GEMINI_API_KEY ? "Loaded ✅" : "Missing ❌");
     const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
+  {
+    contents: [
       {
-        contents: [
-          {
-            parts: [{ text: prompt }]
-          }
-        ]
-      },
-      {
-        headers: {
-          "Content-Type": "application/json"
-        }
+        parts: [{ text: prompt }]
       }
-    );
+    ]
+  },
+  {
+    headers: {
+      "Content-Type": "application/json",
+      "x-goog-api-key": process.env.GEMINI_API_KEY
+    }
+  }
+);
 
     const aiText =
       response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
